@@ -7951,6 +7951,164 @@ SString CStaticFunctionDefinitions::GetVersionSortable ()
 
 /* Handling functions */
 
+bool CStaticFunctionDefinitions::ResetVehicleHandling ( CClientVehicle* pVehicle, bool bUseOriginal )
+{
+    assert ( pVehicle );
+
+    //if ( bUseOriginal )
+    //{
+        auto pHandlingEntry = pVehicle->GetOriginalHandlingData ();
+        pVehicle->GetHandlingData ()->Assign ( pHandlingEntry );
+        pVehicle->ApplyHandling ();
+        return true;
+    //}
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::ResetVehicleHandlingProperty ( CClientVehicle* pVehicle, eHandlingProperty eProperty, bool bUseOriginal )
+{
+    assert ( pVehicle );
+
+    eVehicleTypes eModel = (eVehicleTypes) pVehicle->GetModel ();
+    auto pHandlingEntry = pVehicle->GetHandlingData ();
+
+    if ( pHandlingEntry )
+    {
+        float fValue = 0.0f;
+        CVector vecValue = CVector( 0.0f, 0.0f, 0.0f );
+        SString strValue = "";
+        unsigned int uiValue = 0;
+        unsigned int ucValue = 0;
+
+        if ( GetVehicleHandling ( pVehicle, eProperty, fValue ) )
+        {
+            SetEntryHandling ( pHandlingEntry, eProperty, fValue );
+        }
+        else if ( GetVehicleHandling ( pVehicle, eProperty, uiValue ) )
+        {
+            SetEntryHandling ( pHandlingEntry, eProperty, uiValue );
+        }
+        else if ( GetVehicleHandling ( pVehicle, eProperty, ucValue ) )
+        {
+            SetEntryHandling ( pHandlingEntry, eProperty, ucValue );
+        }
+        else if ( GetVehicleHandling ( pVehicle, eProperty, strValue ) )
+        {
+            SetEntryHandling ( pHandlingEntry, eProperty, strValue );
+        }
+        else if ( GetVehicleHandling ( pVehicle, eProperty, vecValue ) )
+        {
+            SetEntryHandling ( pHandlingEntry, eProperty, vecValue );
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetVehicleHandling ( CClientVehicle* pVehicle, eHandlingProperty eProperty, unsigned char ucValue )
+{
+    assert ( pVehicle );
+    
+    CHandlingEntry* pEntry = pVehicle->GetHandlingData ();
+
+    if ( pEntry )
+    {
+        if ( SetEntryHandling ( pEntry, eProperty, ucValue ) )
+        {
+            pVehicle->ApplyHandling();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetVehicleHandling ( CClientVehicle* pVehicle, eHandlingProperty eProperty, unsigned int uiValue )
+{
+    assert ( pVehicle );
+    
+    CHandlingEntry* pEntry = pVehicle->GetHandlingData ();
+
+    if ( pEntry )
+    {
+        if ( SetEntryHandling ( pEntry, eProperty, uiValue ) )
+        {
+            pVehicle->ApplyHandling();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetVehicleHandling ( CClientVehicle* pVehicle, eHandlingProperty eProperty, float fValue )
+{
+    assert ( pVehicle );
+    
+    CHandlingEntry* pEntry = pVehicle->GetHandlingData ();
+
+    if ( pEntry )
+    {
+        if ( SetEntryHandling ( pEntry, eProperty, fValue ) )
+        {
+            pVehicle->ApplyHandling();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetVehicleHandling ( CClientVehicle* pVehicle, eHandlingProperty eProperty, std::string strValue )
+{
+    assert ( pVehicle );
+
+    CHandlingEntry* pEntry = pVehicle->GetHandlingData ();
+
+    if ( pEntry )
+    {
+        if ( SetEntryHandling ( pEntry, eProperty, strValue ) )
+        {
+            pVehicle->ApplyHandling();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetVehicleHandling ( CClientVehicle* pVehicle, eHandlingProperty eProperty, CVector vecValue )
+{
+    assert ( pVehicle );
+
+    CHandlingEntry* pEntry = pVehicle->GetHandlingData ();
+
+    if ( pEntry )
+    {
+        if ( SetEntryHandling ( pEntry, eProperty, vecValue ) )
+        {
+            pVehicle->ApplyHandling();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 eHandlingProperty CStaticFunctionDefinitions::GetVehicleHandlingEnum ( std::string strProperty )
 {
     eHandlingProperty eProperty = g_pGame->GetHandlingManager ( )->GetPropertyEnumFromName ( strProperty );
@@ -8095,7 +8253,7 @@ bool CStaticFunctionDefinitions::GetEntryHandling ( CHandlingEntry* pEntry, eHan
                 fValue = pEntry->GetSeatOffsetDistance ();
                 break;
             case HANDLING_ABS: // bool
-                fValue = (float)(pEntry->GetABS () ? 1 : 0);
+                fValue = pEntry->GetABS () ? 1.0f : 0.0f;
                 break;
             default:
                 return false;
@@ -8219,6 +8377,441 @@ bool CStaticFunctionDefinitions::GetEntryHandling ( CHandlingEntry* pEntry, eHan
 
     return true;
 }
+
+
+bool CStaticFunctionDefinitions::SetEntryHandling ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned int uiValue )
+{
+    if ( pEntry )
+    {
+        switch ( eProperty )
+        {
+            case HANDLING_PERCENTSUBMERGED:
+            {
+                if ( uiValue > 0 && uiValue <= 200 )
+                {
+                    pEntry->SetPercentSubmerged ( uiValue );
+                    return true;
+                }
+                break;
+            }
+            /*case HANDLING_MONETARY:
+                pEntry->SetMonetary ( uiValue );
+                break;*/
+            case HANDLING_HANDLINGFLAGS:
+            {
+                // Disable NOS and Hydraulic installed properties.
+                if ( uiValue & 0x00080000 )
+                   uiValue &= ~0x00080000;
+                if ( uiValue & 0x00020000 )
+                   uiValue &= ~0x00020000;
+
+                pEntry->SetHandlingFlags ( uiValue );
+                return true;
+            }
+            case HANDLING_MODELFLAGS:
+            {
+                pEntry->SetModelFlags ( uiValue );
+                return true;
+            }
+            default:
+            {
+                    return false;
+            }
+        }
+    }
+    return false;
+}
+
+bool CStaticFunctionDefinitions::SetEntryHandling ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned char ucValue )
+{
+    if ( pEntry )
+    {
+        switch ( eProperty )
+        {
+            case HANDLING_NUMOFGEARS:
+            {
+                if ( ucValue > 0 && ucValue <= 5 )
+                {
+                    pEntry->SetNumberOfGears ( ucValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_ANIMGROUP:
+            {
+                if ( ucValue >= 0 && ucValue <= 29 )
+                {
+                    if ( ucValue != 3 && ucValue != 8 
+                        && ucValue != 17 && ucValue != 23 ) 
+                        return true;    // Pretend it worked to avoid script warnings
+
+                    pEntry->SetAnimGroup ( ucValue );
+                    return true;
+                }
+                break;
+            }
+            default:
+            {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+bool CStaticFunctionDefinitions::SetEntryHandling ( CHandlingEntry* pEntry, eHandlingProperty eProperty, float fValue )
+{
+    if ( pEntry )
+    {
+        switch ( eProperty )
+        {
+            case HANDLING_MASS:
+            {
+                if ( fValue > 0 && fValue <= 100000 )
+                {
+                    pEntry->SetMass ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_TURNMASS:
+            {
+                if ( fValue > 0 && fValue <= 10000000 )
+                {  
+                    pEntry->SetTurnMass ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_DRAGCOEFF:
+            {
+                if ( fValue >= -200 && fValue <= 200 )
+                { 
+                    pEntry->SetDragCoeff ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_TRACTIONMULTIPLIER:
+            {
+                if ( fValue >= -100000 && fValue <= 100000 )
+                {
+                    pEntry->SetTractionMultiplier ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_ENGINEACCELERATION:
+            {
+                if ( fValue >= 0 && fValue <= 100000 )
+                {
+                    pEntry->SetEngineAcceleration ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_ENGINEINERTIA:
+            {
+                if ( fValue >= -1000 && fValue <= 1000 && fValue != 0.0 )
+                {
+                    pEntry->SetEngineInertia ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_MAXVELOCITY:
+            { 
+                if ( fValue >= 0.0 && fValue <= 200000 )
+                {
+                    pEntry->SetMaxVelocity ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_BRAKEDECELERATION:
+            {
+                if ( fValue >= 0.0 && fValue <= 100000 )
+                {
+                    pEntry->SetBrakeDeceleration ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_BRAKEBIAS:
+            {
+                if ( fValue >= 0.0 && fValue <= 1.0 )
+                {
+                    pEntry->SetBrakeBias ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_STEERINGLOCK:
+            {
+                if ( fValue >= 0.0 && fValue <= 360 )
+                {
+                    pEntry->SetSteeringLock ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_TRACTIONLOSS:
+            {            
+                if ( fValue >= 0.0 && fValue <= 100 )
+                {
+                    pEntry->SetTractionLoss ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_TRACTIONBIAS:
+            {
+                if ( fValue >= 0.0 && fValue <= 1.0 )
+                {
+                    pEntry->SetTractionBias ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_FORCELEVEL:
+            {
+                if ( fValue > 0.0 && fValue <= 100 )
+                {
+                    pEntry->SetSuspensionForceLevel ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_DAMPING:
+            {
+                if ( fValue > 0.0 && fValue <= 100 )
+                {
+                    pEntry->SetSuspensionDamping ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_HIGHSPEEDDAMPING:
+            {
+                if ( fValue >= 0.0 && fValue <= 600 )
+                {
+                    pEntry->SetSuspensionHighSpeedDamping ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_UPPER_LIMIT:
+            {
+                if ( fValue >= -50 && fValue <= 50 && fValue > pEntry->GetSuspensionLowerLimit ( ) + 0.01  )
+                {
+                    if ( fValue >= 0.0001 || fValue <= -0.0001 )
+                    {
+                         pEntry->SetSuspensionUpperLimit ( fValue );
+                         return true;
+                     }
+                 }
+                break;
+            }
+            case HANDLING_SUSPENSION_LOWER_LIMIT:
+            {
+                if ( fValue >= -50 && fValue <= 50 && fValue < pEntry->GetSuspensionUpperLimit ( ) - 0.01  )
+                {
+                    if ( fValue >= 0.0001 || fValue <= -0.0001 )
+                    {
+                        pEntry->SetSuspensionLowerLimit ( fValue );
+                        return true;
+                    }
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_FRONTREARBIAS:
+            {
+                if ( fValue >= 0.0 && fValue <= 3.0 )
+                {
+                    pEntry->SetSuspensionFrontRearBias ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SUSPENSION_ANTIDIVEMULTIPLIER:
+            {
+                if ( fValue >= 0.0 && fValue <= 30 )
+                {
+                    pEntry->SetSuspensionAntiDiveMultiplier ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_COLLISIONDAMAGEMULTIPLIER:
+            {
+                if ( fValue >= 0.0 && fValue <= 100 )
+                {
+                    pEntry->SetCollisionDamageMultiplier ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_SEATOFFSETDISTANCE:
+            {
+                if ( fValue >= -20 && fValue <= 20 )
+                {
+                    pEntry->SetSeatOffsetDistance ( fValue );
+                    return true;
+                }
+                break;
+            }
+            case HANDLING_ABS:
+            {
+                pEntry->SetABS ( ( fValue > 0.0f ) ? true : false );
+                return true;
+            }
+            default:
+            {
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetEntryHandling ( CHandlingEntry* pEntry, eHandlingProperty eProperty, CVector vecValue )
+{
+    if ( pEntry )
+    {
+        if ( eProperty == HANDLING_CENTEROFMASS )
+        {
+            if ( vecValue.fX >= -10.0 && vecValue.fX <= 10.0 &&
+                vecValue.fY >= -10.0 && vecValue.fY <= 10.0 &&
+                vecValue.fZ >= -10.0 && vecValue.fZ <= 10.0 )
+            {
+                pEntry->SetCenterOfMass ( vecValue );
+                return true;
+            }
+        }
+    }
+
+
+    return false;
+}
+
+
+bool CStaticFunctionDefinitions::SetEntryHandling ( CHandlingEntry* pEntry, eHandlingProperty eProperty, std::string strValue )
+{
+    if ( pEntry )
+    {
+        switch ( eProperty )
+        {
+            case HANDLING_DRIVETYPE:
+            {
+                if ( strValue == "fwd" )
+                {
+                    pEntry->SetCarDriveType ( CHandlingEntry::FWD );
+                    return true;
+                }
+                else if ( strValue == "rwd" )
+                {
+                    pEntry->SetCarDriveType ( CHandlingEntry::RWD );
+                    return true;
+                }
+                else if ( strValue == "awd" )
+                {
+                    pEntry->SetCarDriveType ( CHandlingEntry::FOURWHEEL );
+                    return true;
+                }
+                else
+                    return false;
+                break;
+            }
+            case HANDLING_ENGINETYPE:
+            {
+                if ( strValue == "petrol" )
+                {
+                    pEntry->SetCarEngineType ( CHandlingEntry::PETROL );
+                    return true;
+                }
+                else if ( strValue == "diesel" )
+                {
+                    pEntry->SetCarEngineType ( CHandlingEntry::DIESEL );
+                    return true;
+                }
+                else if ( strValue == "electric" )
+                {
+                    pEntry->SetCarEngineType ( CHandlingEntry::ELECTRIC );
+                    return true;
+                }
+                else
+                    return false;
+                break;
+            }
+            /*case HANDLING_HEADLIGHT:
+            {
+                if ( strValue == "small" )
+                {
+                    pEntry->SetHeadLight ( CHandlingEntry::SMALL );
+                    ucChar = CHandlingEntry::SMALL;
+                    return true;
+                }
+                else if ( strValue == "long" )
+                {
+                    pEntry->SetHeadLight ( CHandlingEntry::LONG );
+                    ucChar = CHandlingEntry::LONG;
+                    return true;
+                }
+                else if ( strValue == "big" )
+                {
+                    pEntry->SetHeadLight ( CHandlingEntry::BIG );
+                    ucChar = CHandlingEntry::BIG;
+                    return true;
+                }
+                else if ( strValue == "tall" )
+                {
+                    pEntry->SetHeadLight ( CHandlingEntry::TALL );
+                    ucChar = CHandlingEntry::TALL;
+                    return true;
+                }
+                else
+                    return false;
+                break;
+            }
+            case HANDLING_TAILLIGHT:
+            {
+                if ( strValue == "small" )
+                {
+                    pEntry->SetTailLight ( CHandlingEntry::SMALL );
+                    ucChar = CHandlingEntry::SMALL;
+                    return true;
+                }
+                else if ( strValue == "long" )
+                {
+                    pEntry->SetTailLight ( CHandlingEntry::LONG );
+                    ucChar = CHandlingEntry::LONG;
+                    return true;
+                }
+                else if ( strValue == "big" )
+                {
+                    pEntry->SetTailLight ( CHandlingEntry::BIG );
+                    ucChar = CHandlingEntry::BIG;
+                    return true;
+                }
+                else if ( strValue == "tall" )
+                {
+                    pEntry->SetTailLight ( CHandlingEntry::TALL );
+                    ucChar = CHandlingEntry::TALL;
+                    return true;
+                }
+                else
+                    return false;
+                break;
+            }*/
+            default:
+                return false;
+        }
+    }
+
+    return false;
+}
+
 
 bool CStaticFunctionDefinitions::GetWeaponProperty ( eWeaponProperty eProperty, eWeaponType eWeapon, eWeaponSkill eSkillLevel, float & fData )
 {

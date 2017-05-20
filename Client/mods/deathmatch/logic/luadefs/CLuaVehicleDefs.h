@@ -68,8 +68,6 @@ public:
     LUA_DECLARE ( IsVehicleBlown );
     LUA_DECLARE ( GetVehicleHeadLightColor );
     LUA_DECLARE ( GetVehicleCurrentGear );
-    LUA_DECLARE ( GetVehicleHandling );
-    LUA_DECLARE ( GetOriginalHandling )
     LUA_DECLARE ( GetVehicleDoorOpenRatio );
     LUA_DECLARE ( IsVehicleNitroRecharging );
     LUA_DECLARE ( IsVehicleNitroActivated );
@@ -133,6 +131,11 @@ public:
     LUA_DECLARE ( SetVehiclePlateText );
     LUA_DECLARE ( SetHeliBladeCollisionsEnabled );
     LUA_DECLARE ( SetVehicleWindowOpen );
+
+    // Handling
+    LUA_DECLARE ( SetVehicleHandling );
+    LUA_DECLARE ( GetVehicleHandling );
+    LUA_DECLARE ( GetOriginalHandling );
 
     // Components
     LUA_DECLARE ( SetVehicleComponentPosition );

@@ -688,6 +688,13 @@ public:
     
 
     // Handling funcs 
+    static bool                 ResetVehicleHandling                ( CClientVehicle* pVehicle, bool bUseOriginal );
+    static bool                 ResetVehicleHandlingProperty        ( CClientVehicle* pVehicle, eHandlingProperty eProperty, bool bUseOriginal );
+    static bool                 SetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, float fValue );
+    static bool                 SetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, CVector vecValue );
+    static bool                 SetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, std::string strValue );
+    static bool                 SetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, unsigned int uiValue );
+    static bool                 SetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, unsigned char ucValue );
     static eHandlingProperty    GetVehicleHandlingEnum              ( std::string strProperty );
     static bool                 GetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, float& fValue );
     static bool                 GetVehicleHandling                  ( CClientVehicle* pVehicle, eHandlingProperty eProperty, CVector& vecValue );
@@ -698,6 +705,11 @@ public:
     static bool                 GetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, std::string& strValue );
     static bool                 GetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned int& uiValue );
     static bool                 GetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned char& ucValue );
+    static bool                 SetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, float fValue );
+    static bool                 SetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, CVector vecValue );
+    static bool                 SetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, std::string strValue );
+    static bool                 SetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned int uiValue );
+    static bool                 SetEntryHandling                    ( CHandlingEntry* pEntry, eHandlingProperty eProperty, unsigned char ucValue );
 
 
     // Version funcs
