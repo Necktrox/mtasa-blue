@@ -1278,6 +1278,17 @@ void CGame::InitialDataStream ( CPlayer& Player )
     Player.SetStatus ( STATUS_JOINED );
     m_pPlayerManager->OnPlayerJoin( &Player );
 
+    // #9610: Setting player name in an onPlayerConnect event handler results in desync
+    // Solution: Resend CPlayerChangeNickPacket to this player again
+    auto szPlayerName = Player.GetNick();
+
+    if ( szPlayerName )
+    {
+        CPlayerChangeNickPacket ChangeNickPacket ( szPlayerName );
+        ChangeNickPacket.SetSourceElement ( &Player );
+        Player.Send ( ChangeNickPacket );
+    }
+
     // Console
     CLogger::LogPrintf ( "JOIN: %s joined the game (IP: %s)\n", Player.GetNick (), Player.GetSourceIP () );
 
