@@ -68,7 +68,7 @@ public:
     ushort  usIndex;                        // +2
     CAEAudioEntity*         pAudioEntity;   // +4
     CEntitySAInterface*     pGameEntity;    // +8    Either a player or NULL
-    unsigned int m_dwEvent;                 // +12
+    unsigned int     m_dwEvent;             // +12
     float   m_fMaxVolume;                   // +16
     float   m_fVolume;                      // +20
     float   m_fSoundDistance;               // +24

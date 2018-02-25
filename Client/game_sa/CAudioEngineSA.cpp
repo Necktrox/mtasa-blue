@@ -473,7 +473,7 @@ void CAudioEngineSA::SetWorldSoundEnabled ( uint uiGroup, uint uiIndex, bool bEn
         m_DisabledWorldSounds.SetRange ( uiFirst, uiLast - uiFirst + 1 );
 
         if ( bImmediate )
-            g_pAESoundManagerSA->CancelSoundsInBankSlot ( uiGroup, uiIndex );
+            g_pAESoundManagerSA->CancelSoundsInBankSlot ( uiGroup, 0 );
     }
     else
         m_DisabledWorldSounds.UnsetRange ( uiFirst, uiLast - uiFirst + 1 );

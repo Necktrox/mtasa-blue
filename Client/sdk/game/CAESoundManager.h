@@ -10,8 +10,24 @@
 *****************************************************************************/
 #pragma once
 
+class CAESound;
+class CAEAudioEntity;
+class CEntitySAInterface;
+
 class CAESoundManager
 {
 public:
-    virtual void CancelSoundsInBankSlot ( uint uiGroup, uint uiIndex ) = 0;
+    virtual void Initialise                                             ( ) = 0;
+    virtual void Terminate                                              ( ) = 0;
+    virtual void Reset                                                  ( ) = 0;
+    virtual void Service                                                ( ) = 0;
+    virtual void PauseManually                                          ( bool bPaused ) = 0;
+    virtual void RequestNewSound                                        ( CAESound * pAESound ) = 0;
+    virtual int  AreSoundsPlayingInBankSlot                             ( uint16_t usBank ) = 0;
+    virtual int  AreSoundsOfThisEventPlayingForThisEntity               ( uint16_t usEvent, CAEAudioEntity * pAudioEntity ) = 0;
+    virtual int  AreSoundsOfThisEventPlayingForThisEntityAndPhysical    ( uint16_t usEvent, CAEAudioEntity * pAudioEntity, CEntitySAInterface * pGameEntity ) = 0;
+    virtual void CancelSoundsOfThisEventPlayingForThisEntity            ( uint16_t usEvent, CAEAudioEntity * pAudioEntity ) = 0;
+    virtual void CancelSoundsOfThisEventPlayingForThisEntityAndPhysical ( uint16_t usEvent, CAEAudioEntity * pAudioEntity, CEntitySAInterface * pGameEntity ) = 0;
+    virtual void CancelSoundsInBankSlot                                 ( uint16_t usBank, uint8_t bUnknown ) = 0;
+    virtual void CancelSoundsOwnedByAudioEntity                         ( CEntitySAInterface * pGameEntity, uint8_t bUnknown ) = 0;
 };
