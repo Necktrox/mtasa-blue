@@ -8,16 +8,10 @@
 *  Multi Theft Auto is available from http://www.multitheftauto.com/
 *
 *****************************************************************************/
-
-#ifndef __CGAMESA_COMMON
-#define __CGAMESA_COMMON
-
-#define CGAME_DLL
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#pragma once
 
 #include <game/Common.h>
+#include <type_traits>
 
 #undef DEBUG_LOG
 #ifdef DEBUG_LOG
@@ -43,4 +37,38 @@
     #define DEBUG_TRACE(szText) // we do nothing with release versions
 #endif
 
-#endif
+namespace gamesa
+{
+    namespace detail
+    {
+        template < typename T, size_t N >
+        constexpr inline size_t member_size ( T ( *& ) [ N ] )
+        {
+            return N;
+        }
+    }
+
+    template < typename ValueType, uintptr_t address >
+    inline ValueType GetVariable ( )
+    {
+        return * reinterpret_cast < ValueType * > ( address );
+    }
+
+    template < typename ReturnType, uintptr_t address, typename... Arguments >
+    inline ReturnType Call ( Arguments... arguments )
+    {
+        return reinterpret_cast < ReturnType ( __cdecl * ) ( Arguments... ) > ( address ) ( arguments... );
+    }
+
+    template < typename ReturnType, uintptr_t address, typename Class, typename... Arguments >
+    inline ReturnType CallMethod ( Class * self, Arguments... arguments )
+    {
+        return reinterpret_cast < ReturnType ( __thiscall * ) ( Class *, Arguments... ) > ( address ) ( self, arguments... );
+    }
+}
+
+#define GAMESA_INIT_ARRAY_PTR(classMember,address)                      \
+    typename std::remove_extent <                                       \
+                std::remove_pointer < decltype ( classMember ) >::type  \
+                                >::type                                 \
+    ( * classMember ) [ gamesa::detail::member_size ( classMember ) ] = reinterpret_cast < decltype ( classMember ) > ( address );
