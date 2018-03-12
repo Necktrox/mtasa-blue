@@ -19,6 +19,7 @@ project "Game SA"
 	filter {}
 
 	includedirs {
+		".",
 		"../sdk/",
 		"../../vendor/sparsehash/src/"
 	}
