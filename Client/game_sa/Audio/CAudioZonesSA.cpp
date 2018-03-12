@@ -11,11 +11,20 @@
 #include "StdInc.h"
 #include "CAudioZonesSA.h"
 
-#define FUNC_CAudioZones__Init                  0x5081A0
-#define FUNC_CAudioZones__RegisterAudioBox      0x508240
-#define FUNC_CAudioZones__RegisterAudioSphere   0x5081C0
-#define FUNC_CAudioZones__SwitchAudioZone       0x508320
-#define FUNC_CAudioZones__Update                0x5083C0
+// 0x5081A0 CAudioZones::Init(void)
+#define FUNC_CAudioZones__Init 0x5081A0
+
+// 0x5081C0 CAudioZones::RegisterAudioSphere(char *,int,bool,float,float,float,float)
+#define FUNC_CAudioZones__RegisterAudioSphere 0x5081C0
+
+// 0x508240 CAudioZones::RegisterAudioBox(char *,int,bool,float,float,float,float,float,float)
+#define FUNC_CAudioZones__RegisterAudioBox 0x508240
+
+// 0x508320 CAudioZones::SwitchAudioZone(char *,bool)
+#define FUNC_CAudioZones__SwitchAudioZone 0x508320
+
+// 0x5083C0 CAudioZones::Update(bool,CVector)
+#define FUNC_CAudioZones__Update 0x5083C0
 
 #define VAR_CAudioZones__m_aBoxes               0xB6DCD0
 #define VAR_CAudioZones__m_aSpheres             0xB6EBA8
@@ -28,13 +37,14 @@
 #define VAR_CAudioZones__m_fLastCameraPosX      0xB6EBFC // | Only used in CAudioZones::Update(...)
 #define VAR_CAudioZones__m_fLastCameraPosY      0xB6EC00 // | to determine if an update is required
 #define VAR_CAudioZones__m_fLastCameraPosZ      0xB6EC04 // | and that check can be circumvented by forcing the update
+#define VAR_CAudioZones__m_bRenderAudioZones    0xB6DC68
 
-GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aBoxes,           VAR_CAudioZones__m_aBoxes )
-GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aSpheres,         VAR_CAudioZones__m_aSpheres )
-GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aActiveBoxes,     VAR_CAudioZones__m_aActiveBoxes )
-GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aActiveSpheres,   VAR_CAudioZones__m_aActiveSpheres )
+GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aBoxes,           VAR_CAudioZones__m_aBoxes );
+GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aSpheres,         VAR_CAudioZones__m_aSpheres );
+GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aActiveBoxes,     VAR_CAudioZones__m_aActiveBoxes );
+GAMESA_INIT_ARRAY_PTR ( CAudioZonesSA::m_aActiveSpheres,   VAR_CAudioZones__m_aActiveSpheres );
 
-void CAudioZonesSA::Init ( void )
+void CAudioZonesSA::Init ( )
 {
     return gamesa::Call < void, FUNC_CAudioZones__Init > ();
 }
@@ -59,22 +69,22 @@ void CAudioZonesSA::Update ( bool bForced, float fCamPositionX, float fCamPositi
     return gamesa::Call < void, FUNC_CAudioZones__Update, bool, float, float, float > ( bForced, fCamPositionX, fCamPositionY, fCamPositionZ );
 }
 
-int32_t CAudioZonesSA::GetBoxesCount ( void )
+int32_t CAudioZonesSA::GetBoxesCount ( )
 {
     return gamesa::GetVariable < int32_t, VAR_CAudioZones__m_NumBoxes > ( );
 }
 
-int32_t CAudioZonesSA::GetSpheresCount ( void )
+int32_t CAudioZonesSA::GetSpheresCount ( )
 {
     return gamesa::GetVariable < int32_t, VAR_CAudioZones__m_NumSpheres > ( );
 }
 
-int32_t CAudioZonesSA::GetActiveBoxesCount ( void )
+int32_t CAudioZonesSA::GetActiveBoxesCount ( )
 {
     return gamesa::GetVariable < int32_t, VAR_CAudioZones__m_NumActiveBoxes > ( );
 }
 
-int32_t CAudioZonesSA::GetActiveSpheresCount ( void )
+int32_t CAudioZonesSA::GetActiveSpheresCount ( )
 {
     return gamesa::GetVariable < int32_t, VAR_CAudioZones__m_NumActiveSpheres > ( );
 }

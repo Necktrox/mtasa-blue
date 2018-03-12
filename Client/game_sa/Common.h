@@ -42,26 +42,26 @@ namespace gamesa
     namespace detail
     {
         template < typename T, size_t N >
-        constexpr inline size_t member_size ( T ( *& ) [ N ] )
+        constexpr size_t member_size ( T ( *& ) [ N ] )
         {
             return N;
         }
     }
 
     template < typename ValueType, uintptr_t address >
-    inline ValueType GetVariable ( )
+    ValueType GetVariable ( )
     {
         return * reinterpret_cast < ValueType * > ( address );
     }
 
     template < typename ReturnType, uintptr_t address, typename... Arguments >
-    inline ReturnType Call ( Arguments... arguments )
+    ReturnType Call ( Arguments... arguments )
     {
         return reinterpret_cast < ReturnType ( __cdecl * ) ( Arguments... ) > ( address ) ( arguments... );
     }
 
     template < typename ReturnType, uintptr_t address, typename Class, typename... Arguments >
-    inline ReturnType CallMethod ( Class * self, Arguments... arguments )
+    ReturnType CallMethod ( Class * self, Arguments... arguments )
     {
         return reinterpret_cast < ReturnType ( __thiscall * ) ( Class *, Arguments... ) > ( address ) ( self, arguments... );
     }
@@ -71,4 +71,4 @@ namespace gamesa
     typename std::remove_extent <                                       \
                 std::remove_pointer < decltype ( classMember ) >::type  \
                                 >::type                                 \
-    ( * classMember ) [ gamesa::detail::member_size ( classMember ) ] = reinterpret_cast < decltype ( classMember ) > ( address );
+    ( * classMember ) [ gamesa::detail::member_size ( classMember ) ] = reinterpret_cast < decltype ( classMember ) > ( address )
