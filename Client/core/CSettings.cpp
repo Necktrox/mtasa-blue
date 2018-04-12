@@ -372,6 +372,11 @@ void CSettings::CreateGUI(void)
     m_pCheckBoxAllowScreenUpload->GetPosition(vecTemp, false);
     m_pCheckBoxAllowScreenUpload->AutoSize(NULL, 20.0f);
 
+    m_pUseDiscordRPC = reinterpret_cast<CGUICheckBox*>(pManager->CreateCheckBox(pTabMultiplayer, _("Use Discord Rich Presence"), true));
+    m_pUseDiscordRPC->SetPosition(CVector2D(vecTemp.fX, vecTemp.fY + 20.0f));
+    m_pUseDiscordRPC->GetPosition(vecTemp, false);
+    m_pUseDiscordRPC->AutoSize(NULL, 20.0f);
+
     m_pCheckBoxCustomizedSAFiles = reinterpret_cast<CGUICheckBox*>(pManager->CreateCheckBox(pTabMultiplayer, _("Use customized GTA:SA files"), true));
     m_pCheckBoxCustomizedSAFiles->SetPosition(CVector2D(vecTemp.fX, vecTemp.fY + 20.0f));
     m_pCheckBoxCustomizedSAFiles->GetPosition(vecTemp, false);
@@ -1156,6 +1161,7 @@ void CSettings::CreateGUI(void)
     m_pComboFxQuality->SetSelectionHandler(GUI_CALLBACK(&CSettings::OnFxQualityChanged, this));
     m_pCheckBoxVolumetricShadows->SetClickHandler(GUI_CALLBACK(&CSettings::OnVolumetricShadowsClick, this));
     m_pCheckBoxAllowScreenUpload->SetClickHandler(GUI_CALLBACK(&CSettings::OnAllowScreenUploadClick, this));
+    m_pUseDiscordRPC->SetClickHandler(GUI_CALLBACK( &CSettings::OnUseDiscordRPCClick, this));
     m_pCheckBoxCustomizedSAFiles->SetClickHandler(GUI_CALLBACK(&CSettings::OnCustomizedSAFilesClick, this));
     m_pCheckBoxWindowed->SetClickHandler(GUI_CALLBACK(&CSettings::OnWindowedClick, this));
     m_pCheckBoxShowUnsafeResolutions->SetClickHandler(GUI_CALLBACK(&CSettings::ShowUnsafeResolutionsClick, this));
@@ -1429,6 +1435,11 @@ void CSettings::UpdateVideoTab(void)
     bool bAllowScreenUploadEnabled;
     CVARS_GET("allow_screen_upload", bAllowScreenUploadEnabled);
     m_pCheckBoxAllowScreenUpload->SetSelected(bAllowScreenUploadEnabled);
+
+    // Use Discord Rich Presence
+    bool bUseDiscordRichPresenceEnabled;
+    CVARS_GET("use_discord_rich_presence", bUseDiscordRichPresenceEnabled);
+    m_pUseDiscordRPC->SetSelected(bUseDiscordRichPresenceEnabled);
 
     // Customized sa files
     m_pCheckBoxCustomizedSAFiles->SetSelected(GetApplicationSettingInt("customized-sa-files-request") != 0);
@@ -3179,6 +3190,10 @@ void CSettings::SaveData(void)
     bool bAllowScreenUploadEnabled = m_pCheckBoxAllowScreenUpload->GetSelected();
     CVARS_SET("allow_screen_upload", bAllowScreenUploadEnabled);
 
+    // Use Discord Rich Presence
+    bool bUseDiscordRichPresenceEnabled = m_pUseDiscordRPC->GetSelected();
+    CVARS_SET("use_discord_rich_presence", bUseDiscordRichPresenceEnabled);
+
     // Grass
     bool bGrassEnabled = m_pCheckBoxGrass->GetSelected();
     CVARS_SET("grass", bGrassEnabled);
@@ -4134,6 +4149,24 @@ bool CSettings::OnAllowScreenUploadClick(CGUIElement* pElement)
               "\n\n(The chat box and GUI is excluded from the upload)\n");
         CCore::GetSingleton().ShowMessageBox(_("SCREEN UPLOAD INFORMATION"), strMessage, MB_BUTTON_OK | MB_ICON_INFO);
     }
+    return true;
+}
+
+//
+// Use Discord Rich Presence
+//
+bool CSettings::OnUseDiscordRPCClick(CGUIElement* pElement)
+{
+    CDiscordRPCInterface* DiscordRPC = g_pCore->GetDiscordRPC();
+
+    if (!DiscordRPC)
+        return true;
+
+    if (m_pUseDiscordRPC->GetSelected())
+        DiscordRPC->Enable();
+    else
+        DiscordRPC->Disable();
+
     return true;
 }
 

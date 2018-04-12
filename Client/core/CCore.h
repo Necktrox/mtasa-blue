@@ -41,6 +41,7 @@ class CCore;
 #include <ijsify.h>
 #include <core/CWebCoreInterface.h>
 #include "CTrayIcon.h"
+#include "CDiscordRPC.h"
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
@@ -103,6 +104,7 @@ public:
     CLocalizationInterface* GetLocalization(void) { return g_pLocalization; };
     CWebCoreInterface*      GetWebCore(void);
     CTrayIconInterface*     GetTrayIcon(void) { return m_pTrayIcon; };
+    CDiscordRPCInterface*   GetDiscordRPC(void) override { return m_pDiscordRPC; };
 
     void SaveConfig(bool bWaitUntilFinished = false);
 
@@ -288,6 +290,7 @@ private:
     CClientVariables   m_ClientVariables;
     CWebCoreInterface* m_pWebCore = nullptr;
     CTrayIcon*         m_pTrayIcon;
+    CDiscordRPC*       m_pDiscordRPC = nullptr;
 
     // Hook interfaces.
     CMessageLoopHook*        m_pMessageLoopHook;

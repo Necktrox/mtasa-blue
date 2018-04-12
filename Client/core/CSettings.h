@@ -134,6 +134,7 @@ protected:
     CGUIEdit*     m_pEditNick;
     CGUICheckBox* m_pSavePasswords;
     CGUICheckBox* m_pAutoRefreshBrowser;
+    CGUICheckBox* m_pUseDiscordRPC;
 
     CGUILabel*     m_pVideoGeneralLabel;
     CGUILabel*     m_pVideoResolutionLabel;
@@ -363,6 +364,7 @@ protected:
     bool OnFxQualityChanged(CGUIElement* pElement);
     bool OnVolumetricShadowsClick(CGUIElement* pElement);
     bool OnAllowScreenUploadClick(CGUIElement* pElement);
+    bool OnUseDiscordRPCClick(CGUIElement* pElement);
     bool OnCustomizedSAFilesClick(CGUIElement* pElement);
     bool ShowUnsafeResolutionsClick(CGUIElement* pElement);
     bool OnWindowedClick(CGUIElement* pElement);

@@ -274,6 +274,39 @@ void CPacketHandler::Packet_ServerConnected(NetBitStreamInterface& bitStream)
     bitStream.ReadString(strServerVersionSortable);
     g_pClientGame->SetServerVersionSortable(strServerVersionSortable);
 
+    // Get the max player count and server name
+    if (bitStream.Version() >= 0x06C)
+    {
+        size_t& uiMaxPlayerCount = g_pClientGame->m_uiMaxPlayerCount;
+        bitStream.Read(uiMaxPlayerCount);
+
+        std::string& strServerName = g_pClientGame->m_strCurrentServerName;
+        bitStream.ReadString(strServerName);
+
+        CDiscordRPCInterface* pDiscordRPC = g_pCore->GetDiscordRPC();
+
+        if (pDiscordRPC)
+        {
+            // Our player is not in the player manager yet, we have to increase the count by one
+            const size_t uiPlayerCount = g_pClientGame->GetPlayerManager()->Count() + 1;
+            pDiscordRPC->SetServerPresence(strServerName, uiPlayerCount, uiMaxPlayerCount);
+        }
+    }
+    else
+    {
+        g_pClientGame->m_uiMaxPlayerCount = 0;
+        g_pClientGame->m_strCurrentServerName = "";
+
+        CDiscordRPCInterface* pDiscordRPC = g_pCore->GetDiscordRPC();
+
+        if (pDiscordRPC)
+        {
+            // Our player is not in the player manager yet, we have to increase the count by one
+            const size_t uiPlayerCount = g_pClientGame->GetPlayerManager()->Count() + 1;
+            pDiscordRPC->SetServerPresence("Playing on a server", uiPlayerCount, 0);
+        }
+    }
+
     // m_Status = CClientGame::STATUS_TRANSFER;
 
     // Tell the core we're finished
@@ -938,6 +971,8 @@ void CPacketHandler::Packet_PlayerList(NetBitStreamInterface& bitStream)
             RaiseFatalError(5);
         }
     }
+
+    g_pClientGame->UpdateDiscordRichPresence();
 }
 
 void CPacketHandler::Packet_PlayerQuit(NetBitStreamInterface& bitStream)

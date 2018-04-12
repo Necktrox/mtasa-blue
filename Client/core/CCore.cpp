@@ -175,11 +175,22 @@ CCore::CCore(void)
 
     // Create tray icon
     m_pTrayIcon = new CTrayIcon();
+
+    // Create Discord RPC
+    CDiscordRPC::Initialize();
+    m_pDiscordRPC = &CDiscordRPC::GetSingleton();
 }
 
 CCore::~CCore(void)
 {
     WriteDebugEvent("CCore::~CCore");
+
+    // Discord RPC
+    if (m_pDiscordRPC)
+    {
+        m_pDiscordRPC->Disable();
+        m_pDiscordRPC = nullptr;
+    }
 
     // Destroy tray icon
     delete m_pTrayIcon;
@@ -591,6 +602,12 @@ void CCore::SetConnected(bool bConnected)
 {
     m_pLocalGUI->GetMainMenu()->SetIsIngame(bConnected);
     UpdateIsWindowMinimized();            // Force update of stuff
+
+    if (!bConnected)
+    {
+        if (m_pDiscordRPC)
+            m_pDiscordRPC->SetMainMenuPresence();
+    }
 }
 
 bool CCore::IsConnected(void)
@@ -1174,6 +1191,18 @@ void CCore::DoPostFramePulse()
         ApplyGameSettings();
 
         m_pGUI->SelectInputHandlers(INPUT_CORE);
+
+        // Enable Discord RPC
+        if (m_pDiscordRPC)
+        {
+            bool bUseDiscordRichPresence;
+            CVARS_GET("use_discord_rich_presence", bUseDiscordRichPresence);
+
+            if (bUseDiscordRichPresence)
+                m_pDiscordRPC->Enable();
+
+            m_pDiscordRPC->SetMainMenuPresence();
+        }
     }
 
     if (m_pGame->GetSystemState() == 5)            // GS_INIT_ONCE
@@ -1271,6 +1300,9 @@ void CCore::DoPostFramePulse()
 
     if (m_pWebCore)
         m_pWebCore->DoPulse();
+
+    if (m_pDiscordRPC)
+        m_pDiscordRPC->DoPulse();
 
     // Notify the mod manager and the connect manager
     TIMING_CHECKPOINT("-CorePostFrame1");

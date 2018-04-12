@@ -9793,8 +9793,18 @@ bool CStaticFunctionDefinitions::SetMaxPlayers(unsigned int uiMax)
 {
     if (uiMax > m_pMainConfig->GetHardMaxPlayers())
         return false;
+
+    if (uiMax == m_pMainConfig->GetMaxPlayers())
+        return true;
+
     m_pMainConfig->SetSoftMaxPlayers(uiMax);
     g_pNetServer->SetMaximumIncomingConnections(uiMax);
+
+    // Tell all the players
+    CBitStream BitStream;
+    BitStream.pBitStream->Write(uiMax);
+    m_pPlayerManager->BroadcastOnlyJoined(CLuaPacket(SET_MAX_PLAYER_COUNT, *BitStream.pBitStream));
+
     return true;
 }
 

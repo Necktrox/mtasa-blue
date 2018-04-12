@@ -3488,6 +3488,8 @@ void CClientGame::QuitPlayer(CClientPlayer* pPlayer, eQuitReason Reason)
 
     // Delete the player
     delete pPlayer;
+
+    UpdateDiscordRichPresence();
 }
 
 void CClientGame::Event_OnIngame(void)
@@ -6658,4 +6660,42 @@ void CClientGame::RestreamModel(unsigned short usModel)
         // 'Restream' upgrades after model replacement to propagate visual changes with immediate effect
         if (CClientObjectManager::IsValidModel(usModel) && CVehicleUpgrades::IsUpgrade(usModel))
         m_pManager->GetVehicleManager()->RestreamVehicleUpgrades(usModel);
+}
+
+void CClientGame::SetCurrentServerName(const std::string& strServerName)
+{
+    m_strCurrentServerName = strServerName;
+}
+
+const std::string& CClientGame::GetCurrentServerName(void)
+{
+    return m_strCurrentServerName;
+}
+
+void CClientGame::SetMaxPlayerCount(size_t uiMaxPlayerCount)
+{
+    m_uiMaxPlayerCount = uiMaxPlayerCount;
+}
+
+size_t CClientGame::GetMaxPlayerCount(void) const
+{
+    return m_uiMaxPlayerCount;
+}
+
+void CClientGame::UpdateDiscordRichPresence(void) const
+{
+    if (!g_pCore)
+        return;
+
+    if (!g_pCore->GetCVars()->GetValue<bool>("use_discord_rich_presence", true))
+        return;
+
+    CDiscordRPCInterface* pDiscordRPC = g_pCore->GetDiscordRPC();
+
+    if (!pDiscordRPC)
+        return;
+
+    pDiscordRPC->SetPresencePlayerCount(m_pPlayerManager->Count());
+    pDiscordRPC->SetPresenceMaxPlayerCount(m_uiMaxPlayerCount);
+    pDiscordRPC->UpdatePresence();
 }

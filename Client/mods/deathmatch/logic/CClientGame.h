@@ -586,6 +586,11 @@ public:
     bool                           IsUsingAlternatePulseOrder(bool bAdvanceDelayCounter = false);
     void                           SetFileCacheRoot(void);
     const char*                    GetFileCacheRoot(void) { return m_strFileCacheRoot; }
+    void                           SetCurrentServerName(const std::string& strServerName);
+    const std::string&             GetCurrentServerName(void);
+    void                           SetMaxPlayerCount(size_t uiMaxPlayerCount);
+    size_t                         GetMaxPlayerCount(void) const;
+    void                           UpdateDiscordRichPresence(void) const;
 
 private:
     eStatus       m_Status;
@@ -597,6 +602,8 @@ private:
     bool          m_bWaitingForLocalConnect;
     bool          m_bErrorStartingLocal;
     int           m_iLocalConnectAttempts;
+    std::string   m_strCurrentServerName;
+    size_t        m_uiMaxPlayerCount;
 
     bool m_bIsPlayingBack;
     bool m_bFirstPlaybackFrame;
